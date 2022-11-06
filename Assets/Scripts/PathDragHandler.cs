@@ -8,36 +8,43 @@ public class PathDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         
     private bool mousePressed;
 
-    public NewSegmentEvent newSegmentEvent;
+    public TwoVector3Event NewSegmentEvent;
+
+    public Vector3Event OnBeginDragEvent;
+    public Vector3Event OnEndDragEvent;
 
     private void Awake()
     {
-        if (newSegmentEvent == null)
-        {
-            newSegmentEvent = new NewSegmentEvent();
-        }
+        NewSegmentEvent = new TwoVector3Event();
+        OnBeginDragEvent = new Vector3Event();
+        OnEndDragEvent = new Vector3Event();
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        Debug.Log("OnBeginDrag");
         var ray = Camera.main.ScreenPointToRay(eventData.position);
 
         if (Physics.Raycast(ray, out var hit))
         {
             mousePosition = hit.point;
             mousePressed = true;
+
+            OnBeginDragEvent?.Invoke(hit.point);
         }
     }
 
     public void OnDrag(PointerEventData eventData)
     {
+        Debug.Log("OnDrag");
+
         var ray = Camera.main.ScreenPointToRay(eventData.position);
 
         if (Physics.Raycast(ray, out var hit))
         {
             if (Vector3.Distance(mousePosition, hit.point) > 1)
             {
-                newSegmentEvent?.Invoke(mousePosition, hit.point);
+                NewSegmentEvent?.Invoke(mousePosition, hit.point);
 
                 mousePosition = hit.point;
             }
@@ -46,13 +53,25 @@ public class PathDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        mousePressed = false;
+        Debug.Log("OnEndDrag");
+        var ray = Camera.main.ScreenPointToRay(eventData.position);
+
+        if (Physics.Raycast(ray, out var hit))
+        {
+            mousePosition = hit.point;
+            mousePressed = false;
+
+            OnEndDragEvent?.Invoke(hit.point);
+        }
     }
 
     private void OnDestroy()
     {
-        newSegmentEvent.RemoveAllListeners();
+        NewSegmentEvent?.RemoveAllListeners();
+        OnBeginDragEvent?.RemoveAllListeners();
+        OnEndDragEvent?.RemoveAllListeners();
     }
 
-    public class NewSegmentEvent : UnityEvent<Vector3, Vector3> { }
+    public class TwoVector3Event : UnityEvent<Vector3, Vector3> { }
+    public class Vector3Event : UnityEvent<Vector3> { }
 }
