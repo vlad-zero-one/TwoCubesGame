@@ -2,27 +2,35 @@
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-public class PathDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class PathDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerDownHandler
 {
     private Vector3 mousePosition;
         
     private bool mousePressed;
 
-    public TwoVector3Event NewSegmentEvent;
+    public TwoVector3Event NewSegmentEvent = new TwoVector3Event();
 
-    public Vector3Event OnBeginDragEvent;
-    public Vector3Event OnEndDragEvent;
+    public Vector3Event OnBeginDragEvent = new Vector3Event();
+    public Vector3Event OnEndDragEvent = new Vector3Event();
 
-    private void Awake()
+    public UnityEvent OnCancelClick = new UnityEvent();
+
+    public void OnPointerDown(PointerEventData eventData)
     {
-        NewSegmentEvent = new TwoVector3Event();
-        OnBeginDragEvent = new Vector3Event();
-        OnEndDragEvent = new Vector3Event();
+        if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            OnCancelClick?.Invoke();
+        }
+
+        if (eventData.clickCount == 2)
+        {
+            OnCancelClick?.Invoke();
+        }
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        Debug.Log("OnBeginDrag");
+       // Debug.Log("OnBeginDrag");
         var ray = Camera.main.ScreenPointToRay(eventData.position);
 
         if (Physics.Raycast(ray, out var hit))
@@ -36,7 +44,7 @@ public class PathDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
     public void OnDrag(PointerEventData eventData)
     {
-        Debug.Log("OnDrag");
+        //Debug.Log("OnDrag");
 
         var ray = Camera.main.ScreenPointToRay(eventData.position);
 
@@ -57,7 +65,7 @@ public class PathDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        Debug.Log("OnEndDrag");
+       // Debug.Log("OnEndDrag");
         var ray = Camera.main.ScreenPointToRay(eventData.position);
 
         if (Physics.Raycast(ray, out var hit))
@@ -81,6 +89,7 @@ public class PathDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         NewSegmentEvent?.RemoveAllListeners();
         OnBeginDragEvent?.RemoveAllListeners();
         OnEndDragEvent?.RemoveAllListeners();
+        OnCancelClick?.RemoveAllListeners();
     }
 
     public class TwoVector3Event : UnityEvent<Vector3, Vector3> { }
