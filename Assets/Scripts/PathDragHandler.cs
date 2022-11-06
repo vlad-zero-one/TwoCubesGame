@@ -49,6 +49,10 @@ public class PathDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
                 mousePosition = hit.point;
             }
         }
+        else
+        {
+            OnEndDrag(eventData);
+        }
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -62,6 +66,13 @@ public class PathDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             mousePressed = false;
 
             OnEndDragEvent?.Invoke(hit.point);
+        }
+        else
+        {
+            mousePosition = default;
+            mousePressed = false;
+
+            OnEndDragEvent?.Invoke(mousePosition);
         }
     }
 
