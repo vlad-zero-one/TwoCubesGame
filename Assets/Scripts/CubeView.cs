@@ -1,76 +1,102 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 
-[RequireComponent(typeof(Rigidbody), typeof(BoxCollider), typeof(MeshFilter))]
-[RequireComponent(typeof(MeshRenderer))]
-public class CubeView : MonoBehaviour
+namespace Assets.Scripts
 {
-    private new Rigidbody rigidbody;
-    private Vector3 startPoint;
-    private float moveSpeed = 0.5f;
-
-    private Vector3 targetPoint = new Vector3(10, 0, 10);
-    private bool move;
-
-    public UnityEvent OnReachTarget = new UnityEvent();
-
-    public bool ReachesTarget;
-
-    private void Start()
+    [RequireComponent(typeof(Rigidbody), typeof(BoxCollider), typeof(MeshFilter))]
+    [RequireComponent(typeof(MeshRenderer))]
+    public class CubeView : MonoBehaviour
     {
-        rigidbody = GetComponent<Rigidbody>();
+        private float moveSpeed = 5f;
 
-        startPoint = transform.position;
-    }
+        private Vector3 targetPoint = new Vector3(10, 0, 10);
+        private bool move;
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space))
+        public UnityEvent OnReachTarget = new UnityEvent();
+        private Coroutine colliderCoroutine;
+
+        private void OnTriggerEnter(Collider collider)
         {
-            move = !move;
-        }
-
-        Debug.Log("Distance " + (Vector3.Distance(transform.position - startPoint, targetPoint)));
-        if (Vector3.Distance(transform.position - startPoint, targetPoint) < 1.3f)
-        {
-            move = false;
-            ReachesTarget = true;
-            OnReachTarget?.Invoke();
-
-            Debug.Log("Reach target " + targetPoint);
-        }
-    }
-
-    private void FixedUpdate()
-    {
-        if (move)
-        {
-            ReachesTarget = false;
-            //rigidbody.velocity = new Vector3(targetPoint.x, targetPoint.y, targetPoint.z) * moveSpeed;
-
-            if (Vector3.Distance(transform.position - startPoint, targetPoint) < 1.3f)
+            if (collider.gameObject.CompareTag(ObjectTags.EndSphere))
             {
-                transform.position = transform.position + targetPoint * Time.deltaTime * moveSpeed;
+                GetComponent<Collider>().enabled = false;
+            }
+            
+            if (collider.gameObject.CompareTag(ObjectTags.Cube))
+            {
+                Debug.LogError("YOU LOST!");
             }
         }
-        else
+
+        internal void Init()
         {
-            //rigidbody.velocity = Vector3.zero;
+            if (colliderCoroutine == null)
+            {
+                colliderCoroutine = StartCoroutine(DelayedEnableCollider());
+            }
         }
-    }
 
-    public void MoveTo(Vector3 point)
-    {
-        Debug.Log(point);
-        //if (rigidbody != null && rigidbody.velocity != null) rigidbody.velocity = Vector3.zero;
-        targetPoint = point;
-        move = true;
-    }
+        private IEnumerator DelayedEnableCollider()
+        {
+            yield return new WaitForSeconds(0.5f);
+            GetComponent<Collider>().enabled = true;
+        }
 
-    public void Stop()
-    {
-        move = false;
+        private void FixedUpdate()
+        {
+            MovementLogic();
+        }
+
+        private void MovementLogic()
+        {
+            if (move)
+            {
+                if (Vector3.Distance(transform.position, targetPoint) >= 0.1f)
+                {
+                    transform.position += (-transform.position + targetPoint).normalized * moveSpeed * Time.fixedDeltaTime;
+                }
+            }
+
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                move = !move;
+            }
+
+            Debug.Log("Distance " + (Vector3.Distance(transform.position, targetPoint)));
+            if (Vector3.Distance(transform.position, targetPoint) < 0.1f)
+            {
+                move = false;
+                OnReachTarget?.Invoke();
+
+                Debug.Log("Reach target " + targetPoint);
+            }
+        }
+
+        public void MoveTo(Vector3? point)
+        {
+            if (point == null)
+            {
+                move = false;
+                GetComponent<Collider>().enabled = false;
+            }
+            else
+            {
+                targetPoint = point.Value;
+                move = true;
+            }
+        }
+
+        public void Stop()
+        {
+            move = false;
+        }
     }
 }

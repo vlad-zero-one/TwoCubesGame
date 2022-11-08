@@ -40,11 +40,6 @@ public class PathElementsSpawner : MonoBehaviour
         pathsGameObjects.Push(lastPath);
     }
 
-    internal void DestroyPathElement(GameObject pathElement)
-    {
-        Destroy(pathElement);
-    }
-
     internal void DestroyPath()
     {
         Debug.Log("DestroyPath");

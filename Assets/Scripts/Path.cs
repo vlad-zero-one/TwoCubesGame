@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -13,14 +12,12 @@ namespace Assets.Scripts
         private PathElementsSpawner spawner;
         private StartEndPoint endPoint;
 
-        private Vector3 currentPoint;
-
         private int index = 0;
 
         public Path(PathElementsSpawner spawner, StartEndPoint startPoint, StartEndPoint endPoint)
         {
             this.spawner = spawner;
-            points.Add(startPoint.transform.position);
+            points.Add(startPoint.Position);
             this.endPoint = endPoint;
             spawner.InitPath();
         }
@@ -47,13 +44,15 @@ namespace Assets.Scripts
         public void Clear()
         {
             Debug.Log("Clear");
-            foreach(var elem in PathElements)
-            {
-                spawner.DestroyPathElement(elem);
-            }
+
             spawner.DestroyPath();
             PathElements.Clear();
             points.Clear();
+        }
+
+        internal void End()
+        {
+            Add(endPoint.Position);
         }
     }
 }

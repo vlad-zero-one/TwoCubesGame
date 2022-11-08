@@ -58,11 +58,12 @@ namespace Assets.Scripts
 
         private void EndDrag(Vector3 endDragPosition)
         {
-            if (Vector3.Distance(endDragPosition, endPoint.transform.position) < 1 && isLegitStart)
+            if (Vector3.Distance(endDragPosition, endPoint.Position) < 1 && isLegitStart)
             {
                 isLegitEnd = true;
                 if (paths.Count < 2)
                 {
+                    currentPath.End();
                     paths.Add(currentPath);
 
                     if (paths.Count == 2)
@@ -86,7 +87,7 @@ namespace Assets.Scripts
         {
             isLegitEnd = false;
 
-            if (Vector3.Distance(beginDragPosition, startPoint.transform.position) < 1)
+            if (Vector3.Distance(beginDragPosition, startPoint.Position) < 1)
             {
                 isLegitStart = true;
             }
