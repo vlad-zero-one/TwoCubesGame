@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 
-public class StartEndPoint : MonoBehaviour 
+namespace Assets.Scripts
 {
-    public Vector3 Position => transform.position;
+    public class StartEndPoint : MonoBehaviour
+    {
+        public Vector3 Position => transform.position;
+    }
 }

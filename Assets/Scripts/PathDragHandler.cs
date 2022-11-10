@@ -2,96 +2,106 @@
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-public class PathDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerDownHandler
+namespace Assets.Scripts
 {
-    private Vector3 mousePosition;
-        
-    private bool mousePressed;
-
-    public TwoVector3Event NewSegmentEvent = new TwoVector3Event();
-
-    public Vector3Event OnBeginDragEvent = new Vector3Event();
-    public Vector3Event OnEndDragEvent = new Vector3Event();
-
-    public UnityEvent OnCancelClick = new UnityEvent();
-
-    public void OnPointerDown(PointerEventData eventData)
+    public class PathDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerDownHandler
     {
-        if (eventData.button == PointerEventData.InputButton.Right)
+        private Vector3 mousePosition;
+
+        private bool mousePressed;
+
+        public TwoVector3Event NewSegmentEvent = new TwoVector3Event();
+
+        public Vector3Event OnBeginDragEvent = new Vector3Event();
+        public Vector3Event OnEndDragEvent = new Vector3Event();
+
+        public UnityEvent OnCancelClick = new UnityEvent();
+
+        private GameSettings gameSettings;
+
+        private void Start()
         {
-            OnCancelClick?.Invoke();
+            gameSettings = DI.Get<GameSettings>();
         }
 
-        if (eventData.clickCount == 2)
+        public void OnPointerDown(PointerEventData eventData)
         {
-            OnCancelClick?.Invoke();
-        }
-    }
-
-    public void OnBeginDrag(PointerEventData eventData)
-    {
-       // Debug.Log("OnBeginDrag");
-        var ray = Camera.main.ScreenPointToRay(eventData.position);
-
-        if (Physics.Raycast(ray, out var hit))
-        {
-            mousePosition = hit.point;
-            mousePressed = true;
-
-            OnBeginDragEvent?.Invoke(hit.point);
-        }
-    }
-
-    public void OnDrag(PointerEventData eventData)
-    {
-        //Debug.Log("OnDrag");
-
-        var ray = Camera.main.ScreenPointToRay(eventData.position);
-
-        if (Physics.Raycast(ray, out var hit))
-        {
-            if (Vector3.Distance(mousePosition, hit.point) > 1)
+            if (eventData.button == PointerEventData.InputButton.Right)
             {
-                NewSegmentEvent?.Invoke(mousePosition, hit.point);
+                OnCancelClick?.Invoke();
+            }
 
-                mousePosition = hit.point;
+            if (eventData.clickCount == 2)
+            {
+                OnCancelClick?.Invoke();
             }
         }
-        else
+
+        public void OnBeginDrag(PointerEventData eventData)
         {
-            OnEndDrag(eventData);
+            // Debug.Log("OnBeginDrag");
+            var ray = Camera.main.ScreenPointToRay(eventData.position);
+
+            if (Physics.Raycast(ray, out var hit))
+            {
+                mousePosition = hit.point;
+                mousePressed = true;
+
+                OnBeginDragEvent?.Invoke(hit.point);
+            }
         }
-    }
 
-    public void OnEndDrag(PointerEventData eventData)
-    {
-       // Debug.Log("OnEndDrag");
-        var ray = Camera.main.ScreenPointToRay(eventData.position);
-
-        if (Physics.Raycast(ray, out var hit))
+        public void OnDrag(PointerEventData eventData)
         {
-            mousePosition = hit.point;
-            mousePressed = false;
+            //Debug.Log("OnDrag");
 
-            OnEndDragEvent?.Invoke(hit.point);
+            var ray = Camera.main.ScreenPointToRay(eventData.position);
+
+            if (Physics.Raycast(ray, out var hit))
+            {
+                if (Vector3.Distance(mousePosition, hit.point) > gameSettings.SegmentDistance)
+                {
+                    NewSegmentEvent?.Invoke(mousePosition, hit.point);
+
+                    mousePosition = hit.point;
+                }
+            }
+            else
+            {
+                OnEndDrag(eventData);
+            }
         }
-        else
+
+        public void OnEndDrag(PointerEventData eventData)
         {
-            mousePosition = default;
-            mousePressed = false;
+            // Debug.Log("OnEndDrag");
+            var ray = Camera.main.ScreenPointToRay(eventData.position);
 
-            OnEndDragEvent?.Invoke(mousePosition);
+            if (Physics.Raycast(ray, out var hit))
+            {
+                mousePosition = hit.point;
+                mousePressed = false;
+
+                OnEndDragEvent?.Invoke(hit.point);
+            }
+            else
+            {
+                mousePosition = default;
+                mousePressed = false;
+
+                OnEndDragEvent?.Invoke(mousePosition);
+            }
         }
-    }
 
-    private void OnDestroy()
-    {
-        NewSegmentEvent?.RemoveAllListeners();
-        OnBeginDragEvent?.RemoveAllListeners();
-        OnEndDragEvent?.RemoveAllListeners();
-        OnCancelClick?.RemoveAllListeners();
-    }
+        private void OnDestroy()
+        {
+            NewSegmentEvent?.RemoveAllListeners();
+            OnBeginDragEvent?.RemoveAllListeners();
+            OnEndDragEvent?.RemoveAllListeners();
+            OnCancelClick?.RemoveAllListeners();
+        }
 
-    public class TwoVector3Event : UnityEvent<Vector3, Vector3> { }
-    public class Vector3Event : UnityEvent<Vector3> { }
+        public class TwoVector3Event : UnityEvent<Vector3, Vector3> { }
+        public class Vector3Event : UnityEvent<Vector3> { }
+    }
 }

@@ -2,54 +2,57 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PathElementsSpawner : MonoBehaviour
+namespace Assets.Scripts
 {
-    [SerializeField] private GameObject pathElementPrefab;
-    [SerializeField] private GameObject pathPrefab;
-
-    private Stack<GameObject> pathsGameObjects = new Stack<GameObject>();
-
-    private GameObject lastPath;
-
-    internal GameObject SpawnPathElement(Vector3 from, Vector3 to)
+    public class PathElementsSpawner : MonoBehaviour
     {
-        var middlePosition = (from + to) / 2;
-        middlePosition.y = 0;
+        [SerializeField] private GameObject pathElementPrefab;
+        [SerializeField] private GameObject pathPrefab;
 
-        var rotation = Quaternion.LookRotation(to - from);
-        rotation *= Quaternion.Euler(90, 0, 0);
+        private Stack<GameObject> pathsGameObjects = new Stack<GameObject>();
 
-        var elem = Instantiate(pathElementPrefab, middlePosition, rotation, lastPath.transform);
-        var elemTransform = elem.transform;
+        private GameObject lastPath;
 
-        return elem;
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space))
+        internal GameObject SpawnPathElement(Vector3 from, Vector3 to)
         {
-            Debug.Log("pathsGameObjects.Count " + pathsGameObjects.Count);
+            var middlePosition = (from + to) / 2;
+            middlePosition.y = 0;
+
+            var rotation = Quaternion.LookRotation(to - from);
+            rotation *= Quaternion.Euler(90, 0, 0);
+
+            var elem = Instantiate(pathElementPrefab, middlePosition, rotation, lastPath.transform);
+            var elemTransform = elem.transform;
+
+            return elem;
         }
-    }
 
-
-    internal void InitPath()
-    {
-        lastPath = Instantiate(pathPrefab);
-        pathsGameObjects.Push(lastPath);
-    }
-
-    internal void DestroyPath()
-    {
-        Debug.Log("DestroyPath");
-        if (pathsGameObjects.Count > 0)
+        private void Update()
         {
-            Destroy(pathsGameObjects.Pop());
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                Debug.Log("pathsGameObjects.Count " + pathsGameObjects.Count);
+            }
+        }
 
+
+        internal void InitPath()
+        {
+            lastPath = Instantiate(pathPrefab);
+            pathsGameObjects.Push(lastPath);
+        }
+
+        internal void DestroyPath()
+        {
+            Debug.Log("DestroyPath");
             if (pathsGameObjects.Count > 0)
             {
-                lastPath = pathsGameObjects.Peek();
+                Destroy(pathsGameObjects.Pop());
+
+                if (pathsGameObjects.Count > 0)
+                {
+                    lastPath = pathsGameObjects.Peek();
+                }
             }
         }
     }

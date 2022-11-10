@@ -9,13 +9,20 @@ namespace Assets.Scripts
     public class CubesController : MonoBehaviour
     {
         [SerializeField] private GameObject cubePrefab;
-        [SerializeField] private PathController pathController;
         [SerializeField] private StartEndPoint startPoint;
+
+        private PathController pathController;
 
         private List<CubeView> cubes = new List<CubeView>();
 
+        private void Awake()
+        {
+            DI.Add(this);
+        }
+
         void Start()
         {
+            pathController = DI.Get<PathController>();
             pathController.OnPathsAreReady.AddListener(SpawnCubes);
         }
 

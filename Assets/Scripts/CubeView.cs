@@ -13,11 +13,13 @@ namespace Assets.Scripts
     {
         private float moveSpeed = 5f;
 
-        private Vector3 targetPoint = new Vector3(10, 0, 10);
+        private Vector3 targetPoint;
         private bool move;
 
         public UnityEvent OnReachTarget = new UnityEvent();
         private Coroutine colliderCoroutine;
+
+        private GameSettings settings;
 
         private void OnTriggerEnter(Collider collider)
         {
@@ -34,6 +36,9 @@ namespace Assets.Scripts
 
         internal void Init()
         {
+            settings = DI.Get<GameSettings>();
+            moveSpeed = settings.CubeMoveSpeed;
+
             if (colliderCoroutine == null)
             {
                 colliderCoroutine = StartCoroutine(DelayedEnableCollider());
@@ -42,7 +47,7 @@ namespace Assets.Scripts
 
         private IEnumerator DelayedEnableCollider()
         {
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(settings.DelayForEnableColliderOnStart);
             GetComponent<Collider>().enabled = true;
         }
 
@@ -55,7 +60,7 @@ namespace Assets.Scripts
         {
             if (move)
             {
-                if (Vector3.Distance(transform.position, targetPoint) >= 0.1f)
+                if (Vector3.Distance(transform.position, targetPoint) >= settings.DistanceToPointForCompleteMove)
                 {
                     transform.position += (-transform.position + targetPoint).normalized * moveSpeed * Time.fixedDeltaTime;
                 }
@@ -71,7 +76,7 @@ namespace Assets.Scripts
             }
 
             Debug.Log("Distance " + (Vector3.Distance(transform.position, targetPoint)));
-            if (Vector3.Distance(transform.position, targetPoint) < 0.1f)
+            if (Vector3.Distance(transform.position, targetPoint) < settings.DistanceToPointForCompleteMove)
             {
                 move = false;
                 OnReachTarget?.Invoke();

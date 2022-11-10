@@ -23,8 +23,17 @@ namespace Assets.Scripts
 
         public List<Path> Paths => paths;
 
+        private GameSettings gameSettings;
+
+        private void Awake()
+        {
+            DI.Add(this);
+        }
+
         private void Start()
         {
+            gameSettings = DI.Get<GameSettings>();
+        
             pathDragHandler.OnBeginDragEvent.AddListener(BeginDrag);
             pathDragHandler.OnEndDragEvent.AddListener(EndDrag);
             pathDragHandler.NewSegmentEvent.AddListener(AddPathPoint);
@@ -58,15 +67,15 @@ namespace Assets.Scripts
 
         private void EndDrag(Vector3 endDragPosition)
         {
-            if (Vector3.Distance(endDragPosition, endPoint.Position) < 1 && isLegitStart)
+            if (Vector3.Distance(endDragPosition, endPoint.Position) <= gameSettings.SegmentDistance && isLegitStart)
             {
                 isLegitEnd = true;
-                if (paths.Count < 2)
+                if (paths.Count < gameSettings.PathsCount)
                 {
                     currentPath.End();
                     paths.Add(currentPath);
 
-                    if (paths.Count == 2)
+                    if (paths.Count == gameSettings.PathsCount)
                     {
                         OnPathsAreReady?.Invoke();
                     }
@@ -87,7 +96,7 @@ namespace Assets.Scripts
         {
             isLegitEnd = false;
 
-            if (Vector3.Distance(beginDragPosition, startPoint.Position) < 1)
+            if (Vector3.Distance(beginDragPosition, startPoint.Position) <= gameSettings.SegmentDistance)
             {
                 isLegitStart = true;
             }
@@ -97,7 +106,7 @@ namespace Assets.Scripts
         {
             if (isLegitStart)
             {
-                if (paths.Count < 2 && currentPath == null)
+                if (paths.Count < gameSettings.PathsCount && currentPath == null)
                 {
                     currentPath = new Path(spawner, startPoint, endPoint);
                 }
