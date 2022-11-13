@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Assets.Scripts.Utils;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -6,7 +7,7 @@ namespace Assets.Scripts
 {
     public class Cube : MonoBehaviour
     {
-        public UnityEvent OnReachEndSphere = new UnityEvent();
+        public CubeEvent OnReachEndSphere = new CubeEvent();
         public UnityEvent OnAnotherCubeTouched = new UnityEvent();
         public UnityEvent OnReachTarget = new UnityEvent();
 
@@ -36,6 +37,7 @@ namespace Assets.Scripts
             {
                 move = false;
                 GetComponent<Collider>().enabled = false;
+                OnReachEndSphere?.Invoke(this);
             }
             else
             {
@@ -58,13 +60,6 @@ namespace Assets.Scripts
 
         private void OnTriggerEnter(Collider collider)
         {
-            if (collider.gameObject.CompareTag(ObjectTags.EndSphere))
-            {
-                GetComponent<Collider>().enabled = false;
-
-                OnReachEndSphere?.Invoke();
-            }
-
             if (collider.gameObject.CompareTag(ObjectTags.Cube))
             {
                 OnAnotherCubeTouched?.Invoke();

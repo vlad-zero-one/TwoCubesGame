@@ -56,8 +56,9 @@ namespace Assets.Scripts
             }
         }
 
-        private void CubeReachedEndSphere()
+        private void CubeReachedEndSphere(Cube cube)
         {
+            cube.OnReachTarget.RemoveAllListeners();
             cubesInEndSphere++;
             if(cubes.Count == cubesInEndSphere)
             {
