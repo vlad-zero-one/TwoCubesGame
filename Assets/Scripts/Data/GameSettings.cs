@@ -10,11 +10,10 @@ namespace Assets.Scripts
         [Space, Header("Cube")]
         public float CubeMoveSpeed;
         public float DelayForEnableColliderOnStart;
-        [Range(0.1f, 1f)]
-        public float DistanceToPointForCompleteMove = 0.1f;
+        [Range(0.1f, 1f)] public float DistanceToPointForCompleteMove = 0.1f;
 
         [Space, Header("Path")]
-        public float SegmentDistance;
+        [Range(0.5f, 2f)] public float SegmentDistance;
         public int PathsCount;
     }
 }

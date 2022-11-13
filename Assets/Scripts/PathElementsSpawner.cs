@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts
@@ -27,15 +26,6 @@ namespace Assets.Scripts
             return elem;
         }
 
-        private void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                Debug.Log("pathsGameObjects.Count " + pathsGameObjects.Count);
-            }
-        }
-
-
         internal void InitPath()
         {
             lastPath = Instantiate(pathPrefab);
@@ -44,7 +34,6 @@ namespace Assets.Scripts
 
         internal void DestroyPath()
         {
-            Debug.Log("DestroyPath");
             if (pathsGameObjects.Count > 0)
             {
                 Destroy(pathsGameObjects.Pop());

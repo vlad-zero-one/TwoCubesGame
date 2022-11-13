@@ -6,7 +6,7 @@ namespace Assets.Scripts
 {
     public class Path
     {
-        public List<GameObject> PathElements = new List<GameObject>();
+        public List<Vector3> Points => points;
 
         private List<Vector3> points = new List<Vector3>();
         private PathElementsSpawner spawner;
@@ -26,7 +26,6 @@ namespace Assets.Scripts
         {
             if (index < points.Count)
             {
-                //Debug.Log("!!! " + points[index]);
                 return points[index++];
             }
             return null;
@@ -38,15 +37,11 @@ namespace Assets.Scripts
             points.Add(point);
 
             var elem = spawner.SpawnPathElement(lastPoint, points.Last());
-            PathElements.Add(elem);
         }
 
         public void Clear()
         {
-            Debug.Log("Clear");
-
             spawner.DestroyPath();
-            PathElements.Clear();
             points.Clear();
         }
 

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Assets.Scripts
 {
@@ -15,8 +13,7 @@ namespace Assets.Scripts
             Add(typeof(T), obj);
         }
 
-        public static void Add(Type t, object obj)  {objectByType[t] = obj;             Debug.Log(t);
-}
+        public static void Add(Type t, object obj) => objectByType[t] = obj;
 
         public static T Get<T>() where T : class
         {

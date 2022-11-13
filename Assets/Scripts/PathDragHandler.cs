@@ -19,9 +19,9 @@ namespace Assets.Scripts
 
         private GameSettings gameSettings;
 
-        private void Start()
+        public void Init(GameSettings gameSettings)
         {
-            gameSettings = DI.Get<GameSettings>();
+            this.gameSettings = gameSettings;
         }
 
         public void OnPointerDown(PointerEventData eventData)

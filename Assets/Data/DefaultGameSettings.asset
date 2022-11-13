@@ -16,4 +16,4 @@ MonoBehaviour:
   DelayForEnableColliderOnStart: 0.5
   DistanceToPointForCompleteMove: 0.1
   SegmentDistance: 1
-  PathsCount: 3
+  PathsCount: 2

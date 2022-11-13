@@ -8,7 +8,6 @@ namespace Assets.Scripts
 {
     public class PathController : MonoBehaviour
     {
-        [SerializeField] private PathDragHandler pathDragHandler;
         [SerializeField] private StartEndPoint startPoint;
         [SerializeField] private StartEndPoint endPoint;
         [SerializeField] private PathElementsSpawner spawner;
@@ -23,17 +22,14 @@ namespace Assets.Scripts
 
         public List<Path> Paths => paths;
 
+        private PathDragHandler pathDragHandler;
         private GameSettings gameSettings;
 
-        private void Awake()
+        public void Init(GameSettings gameSettings, PathDragHandler pathDragHandler)
         {
-            DI.Add(this);
-        }
+            this.gameSettings = gameSettings;
+            this.pathDragHandler = pathDragHandler;
 
-        private void Start()
-        {
-            gameSettings = DI.Get<GameSettings>();
-        
             pathDragHandler.OnBeginDragEvent.AddListener(BeginDrag);
             pathDragHandler.OnEndDragEvent.AddListener(EndDrag);
             pathDragHandler.NewSegmentEvent.AddListener(AddPathPoint);
@@ -42,26 +38,21 @@ namespace Assets.Scripts
 
         private void CancelPath()
         {
-            Debug.Log("CancelPath");
             if (currentPath == null)
             {
-                Debug.Log("else");
-
                 if (paths.Count > 0)
                 {
-                    Debug.Log("paths.Count > 0");
-
                     paths.RemoveAt(paths.Count - 1);
                 }
                 spawner.DestroyPath();
             }
         }
 
-        private void Update()
+        internal void Restart()
         {
-            if(Input.GetKeyDown(KeyCode.Space))
+            while (paths.Count > 0)
             {
-                Debug.Log("paths.Count " + paths.Count);
+                CancelPath();
             }
         }
 
@@ -123,6 +114,9 @@ namespace Assets.Scripts
             pathDragHandler.OnBeginDragEvent.RemoveListener(BeginDrag);
             pathDragHandler.OnEndDragEvent.RemoveListener(EndDrag);
             pathDragHandler.NewSegmentEvent.RemoveListener(AddPathPoint);
+            pathDragHandler.OnCancelClick.RemoveListener(CancelPath);
+
+            OnPathsAreReady.RemoveAllListeners();
         }
     }
 }

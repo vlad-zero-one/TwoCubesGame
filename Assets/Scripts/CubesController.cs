@@ -13,16 +13,17 @@ namespace Assets.Scripts
 
         private PathController pathController;
 
-        private List<CubeView> cubes = new List<CubeView>();
+        private List<Cube> cubes = new List<Cube>();
 
-        private void Awake()
-        {
-            DI.Add(this);
-        }
+        public UnityEvent OnCubesTouched = new UnityEvent();
+        public UnityEvent OnAllCubesReachedEndSphere = new UnityEvent();
 
-        void Start()
+        private int cubesInEndSphere = 0;
+
+        public void Init(PathController pathController)
         {
-            pathController = DI.Get<PathController>();
+            this.pathController = pathController;
+
             pathController.OnPathsAreReady.AddListener(SpawnCubes);
         }
 
@@ -30,36 +31,59 @@ namespace Assets.Scripts
         {
             foreach(var path in pathController.Paths)
             {
-                var cube = Instantiate(cubePrefab, startPoint.Position, Quaternion.identity, gameObject.transform).GetComponent<CubeView>();
+                var cube = Instantiate(cubePrefab, startPoint.Position, Quaternion.identity, gameObject.transform)
+                    .GetComponent<Cube>();
 
                 cubes.Add(cube);
 
                 cube.Init();
                 cube.OnReachTarget.AddListener(() => MoveCube(cube, path));
+                cube.OnAnotherCubeTouched.AddListener(CubesTouched);
+                cube.OnReachEndSphere.AddListener(CubeReachedEndSphere);
+
                 MoveCube(cube, path);
             }
         }
 
-        private void MoveCube(CubeView cube, Path path)
+        internal void Restart()
+        {
+            cubesInEndSphere = 0;
+
+            foreach(var cube in cubes)
+            {
+                Destroy(cube.gameObject);
+            }
+            cubes.Clear();
+        }
+
+        private void CubeReachedEndSphere()
+        {
+            cubesInEndSphere++;
+            if(cubes.Count == cubesInEndSphere)
+            {
+                OnAllCubesReachedEndSphere?.Invoke();
+            }
+        }
+
+        private void CubesTouched()
+        {
+            OnCubesTouched?.Invoke();
+        }
+
+        private void MoveCube(Cube cube, Path path)
         {
             cube.MoveTo(path.GetNextPoint());
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                Debug.Log(pathController.Paths[0].GetNextPoint().Value);
-            }
-        }
-
         private void OnDestroy()
         {
+            pathController.OnPathsAreReady.RemoveListener(SpawnCubes);
             foreach(var cube in cubes)
             {
-                cube.OnReachTarget.RemoveAllListeners();
+                cube.RemoveAllListeners();
             }
+            OnCubesTouched.RemoveAllListeners();
+            OnAllCubesReachedEndSphere.RemoveAllListeners();
         }
     }
 }

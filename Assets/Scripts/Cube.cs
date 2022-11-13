@@ -9,7 +9,7 @@ namespace Assets.Scripts
 {
     [RequireComponent(typeof(Rigidbody), typeof(BoxCollider), typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
-    public class CubeView : MonoBehaviour
+    public class Cube : MonoBehaviour
     {
         private float moveSpeed = 5f;
 
@@ -21,16 +21,22 @@ namespace Assets.Scripts
 
         private GameSettings settings;
 
+        public UnityEvent OnReachEndSphere = new UnityEvent();
+        public UnityEvent OnAnotherCubeTouched = new UnityEvent();
+
         private void OnTriggerEnter(Collider collider)
         {
             if (collider.gameObject.CompareTag(ObjectTags.EndSphere))
             {
                 GetComponent<Collider>().enabled = false;
+
+                OnReachEndSphere?.Invoke();
             }
             
             if (collider.gameObject.CompareTag(ObjectTags.Cube))
             {
-                Debug.LogError("YOU LOST!");
+                OnAnotherCubeTouched?.Invoke();
+                Stop();
             }
         }
 
@@ -75,13 +81,13 @@ namespace Assets.Scripts
                 move = !move;
             }
 
-            Debug.Log("Distance " + (Vector3.Distance(transform.position, targetPoint)));
+            //Debug.Log("Distance " + (Vector3.Distance(transform.position, targetPoint)));
             if (Vector3.Distance(transform.position, targetPoint) < settings.DistanceToPointForCompleteMove)
             {
                 move = false;
                 OnReachTarget?.Invoke();
 
-                Debug.Log("Reach target " + targetPoint);
+                //Debug.Log("Reach target " + targetPoint);
             }
         }
 
@@ -102,6 +108,18 @@ namespace Assets.Scripts
         public void Stop()
         {
             move = false;
+        }
+
+        private void OnDestroy()
+        {
+            RemoveAllListeners();
+        }
+
+        public void RemoveAllListeners()
+        {
+            OnReachTarget.RemoveAllListeners();
+            OnReachEndSphere.RemoveAllListeners();
+            OnAnotherCubeTouched.RemoveAllListeners();
         }
     }
 }
