@@ -2,7 +2,7 @@
 
 namespace Assets.Scripts
 {
-    public class StartEndPoint : MonoBehaviour
+    public class StartEndSphere : MonoBehaviour
     {
         public Vector3 Position => transform.position;
     }

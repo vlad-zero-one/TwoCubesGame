@@ -1,28 +1,60 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace Assets.Scripts
 {
-    [RequireComponent(typeof(Rigidbody), typeof(BoxCollider), typeof(MeshFilter))]
-    [RequireComponent(typeof(MeshRenderer))]
     public class Cube : MonoBehaviour
     {
-        private float moveSpeed = 5f;
+        public UnityEvent OnReachEndSphere = new UnityEvent();
+        public UnityEvent OnAnotherCubeTouched = new UnityEvent();
+        public UnityEvent OnReachTarget = new UnityEvent();
+
+        private float moveSpeed;
 
         private Vector3 targetPoint;
         private bool move;
 
-        public UnityEvent OnReachTarget = new UnityEvent();
         private Coroutine colliderCoroutine;
 
         private GameSettings settings;
 
-        public UnityEvent OnReachEndSphere = new UnityEvent();
-        public UnityEvent OnAnotherCubeTouched = new UnityEvent();
+        public void Init()
+        {
+            settings = DI.Get<GameSettings>();
+            moveSpeed = settings.CubeMoveSpeed;
+
+            if (colliderCoroutine == null)
+            {
+                colliderCoroutine = StartCoroutine(DelayedEnableCollider());
+            }
+        }
+
+        public void MoveTo(Vector3? point)
+        {
+            if (point == null)
+            {
+                move = false;
+                GetComponent<Collider>().enabled = false;
+            }
+            else
+            {
+                targetPoint = point.Value;
+                move = true;
+            }
+        }
+
+        public void Stop()
+        {
+            move = false;
+        }
+
+        public void RemoveAllListeners()
+        {
+            OnReachTarget.RemoveAllListeners();
+            OnReachEndSphere.RemoveAllListeners();
+            OnAnotherCubeTouched.RemoveAllListeners();
+        }
 
         private void OnTriggerEnter(Collider collider)
         {
@@ -32,22 +64,11 @@ namespace Assets.Scripts
 
                 OnReachEndSphere?.Invoke();
             }
-            
+
             if (collider.gameObject.CompareTag(ObjectTags.Cube))
             {
                 OnAnotherCubeTouched?.Invoke();
                 Stop();
-            }
-        }
-
-        internal void Init()
-        {
-            settings = DI.Get<GameSettings>();
-            moveSpeed = settings.CubeMoveSpeed;
-
-            if (colliderCoroutine == null)
-            {
-                colliderCoroutine = StartCoroutine(DelayedEnableCollider());
             }
         }
 
@@ -76,50 +97,16 @@ namespace Assets.Scripts
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                move = !move;
-            }
-
-            //Debug.Log("Distance " + (Vector3.Distance(transform.position, targetPoint)));
             if (Vector3.Distance(transform.position, targetPoint) < settings.DistanceToPointForCompleteMove)
             {
                 move = false;
                 OnReachTarget?.Invoke();
-
-                //Debug.Log("Reach target " + targetPoint);
             }
-        }
-
-        public void MoveTo(Vector3? point)
-        {
-            if (point == null)
-            {
-                move = false;
-                GetComponent<Collider>().enabled = false;
-            }
-            else
-            {
-                targetPoint = point.Value;
-                move = true;
-            }
-        }
-
-        public void Stop()
-        {
-            move = false;
         }
 
         private void OnDestroy()
         {
             RemoveAllListeners();
-        }
-
-        public void RemoveAllListeners()
-        {
-            OnReachTarget.RemoveAllListeners();
-            OnReachEndSphere.RemoveAllListeners();
-            OnAnotherCubeTouched.RemoveAllListeners();
         }
     }
 }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Events;
+﻿using UnityEngine;
 
 namespace Assets.Scripts
 {
@@ -12,27 +8,30 @@ namespace Assets.Scripts
         [SerializeField] private CubesController cubesController;
         [SerializeField] private PathController pathController;
         [SerializeField] private PathDragHandler pathDragHandler;
+        [SerializeField] private SpheresController spheresController;
 
         private ScoreController scoreController = new ScoreController();
 
-        private void Start()
+        private async void Start()
         {
             var gameSettings = DI.Get<GameSettings>();
 
+            await spheresController.Init(pathDragHandler.gameObject);
             pathDragHandler.Init(gameSettings);
-            pathController.Init(gameSettings, pathDragHandler);
-            cubesController.Init(pathController);
+            pathController.Init(
+                gameSettings, pathDragHandler, spheresController.StartSphere, spheresController.EndSphere);
+            cubesController.Init(pathController, spheresController.StartSphere);
             scoreController.Init(cubesController, pathController);
 
             menu.Init(scoreController, StartGame, QuitGame);
 
+            DI.Add(spheresController);
             DI.Add(pathController);
             DI.Add(cubesController);
             DI.Add(scoreController);
 
             cubesController.OnCubesTouched.AddListener(LostGame);
             cubesController.OnAllCubesReachedEndSphere.AddListener(WinGame);
-
         }
 
         private void WinGame()
@@ -47,8 +46,9 @@ namespace Assets.Scripts
             menu.SetActive(true);
         }
 
-        private void StartGame()
+        private async void StartGame()
         {
+            await spheresController.Restart();
             pathController.Restart();
             cubesController.Restart();
 

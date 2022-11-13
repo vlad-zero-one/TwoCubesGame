@@ -10,15 +10,15 @@ namespace Assets.Scripts
 
         private List<Vector3> points = new List<Vector3>();
         private PathElementsSpawner spawner;
-        private StartEndPoint endPoint;
+        private StartEndSphere endSphere;
 
         private int index = 0;
 
-        public Path(PathElementsSpawner spawner, StartEndPoint startPoint, StartEndPoint endPoint)
+        public Path(PathElementsSpawner spawner, StartEndSphere startPoint, StartEndSphere endSphere)
         {
             this.spawner = spawner;
             points.Add(startPoint.Position);
-            this.endPoint = endPoint;
+            this.endSphere = endSphere;
             spawner.InitPath();
         }
 
@@ -36,7 +36,7 @@ namespace Assets.Scripts
             var lastPoint = points.Last();
             points.Add(point);
 
-            var elem = spawner.SpawnPathElement(lastPoint, points.Last());
+            spawner.SpawnPathElement(lastPoint, points.Last());
         }
 
         public void Clear()
@@ -45,9 +45,9 @@ namespace Assets.Scripts
             points.Clear();
         }
 
-        internal void End()
+        public void End()
         {
-            Add(endPoint.Position);
+            Add(endSphere.Position);
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -9,29 +7,42 @@ namespace Assets.Scripts
     public class CubesController : MonoBehaviour
     {
         [SerializeField] private GameObject cubePrefab;
-        [SerializeField] private StartEndPoint startPoint;
-
-        private PathController pathController;
-
-        private List<Cube> cubes = new List<Cube>();
 
         public UnityEvent OnCubesTouched = new UnityEvent();
         public UnityEvent OnAllCubesReachedEndSphere = new UnityEvent();
 
+        private StartEndSphere startSphere;
+        private PathController pathController;
+
+        private List<Cube> cubes = new List<Cube>();
+
         private int cubesInEndSphere = 0;
 
-        public void Init(PathController pathController)
+        public void Init(PathController pathController, StartEndSphere startSphere)
         {
             this.pathController = pathController;
-
+            this.startSphere = startSphere;
             pathController.OnPathsAreReady.AddListener(SpawnCubes);
+        }
+
+        public void Restart()
+        {
+            cubesInEndSphere = 0;
+
+            foreach (var cube in cubes)
+            {
+                Destroy(cube.gameObject);
+            }
+            cubes.Clear();
+
+            startSphere = DI.Get<SpheresController>().StartSphere;
         }
 
         private void SpawnCubes()
         {
             foreach(var path in pathController.Paths)
             {
-                var cube = Instantiate(cubePrefab, startPoint.Position, Quaternion.identity, gameObject.transform)
+                var cube = Instantiate(cubePrefab, startSphere.Position, Quaternion.identity, gameObject.transform)
                     .GetComponent<Cube>();
 
                 cubes.Add(cube);
@@ -43,17 +54,6 @@ namespace Assets.Scripts
 
                 MoveCube(cube, path);
             }
-        }
-
-        internal void Restart()
-        {
-            cubesInEndSphere = 0;
-
-            foreach(var cube in cubes)
-            {
-                Destroy(cube.gameObject);
-            }
-            cubes.Clear();
         }
 
         private void CubeReachedEndSphere()

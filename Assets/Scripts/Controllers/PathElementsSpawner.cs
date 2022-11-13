@@ -12,7 +12,7 @@ namespace Assets.Scripts
 
         private GameObject lastPath;
 
-        internal GameObject SpawnPathElement(Vector3 from, Vector3 to)
+        public GameObject SpawnPathElement(Vector3 from, Vector3 to)
         {
             var middlePosition = (from + to) / 2;
             middlePosition.y = 0;
@@ -26,13 +26,13 @@ namespace Assets.Scripts
             return elem;
         }
 
-        internal void InitPath()
+        public void InitPath()
         {
             lastPath = Instantiate(pathPrefab);
             pathsGameObjects.Push(lastPath);
         }
 
-        internal void DestroyPath()
+        public void DestroyPath()
         {
             if (pathsGameObjects.Count > 0)
             {

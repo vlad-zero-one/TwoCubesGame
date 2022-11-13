@@ -20,6 +20,16 @@ namespace Assets.Scripts
             cubesController.OnAllCubesReachedEndSphere.AddListener(CalculateScore);
         }
 
+        public float GetLastScore()
+        {
+            return PlayerPrefs.GetFloat(SaveKeys.LastScore);
+        }
+
+        public float GetBestScore()
+        {
+            return PlayerPrefs.GetFloat(SaveKeys.BestScore);
+        }
+
         private void CalculateScore()
         {
             var lengths = new List<float>();
@@ -60,16 +70,6 @@ namespace Assets.Scripts
             }
 
             PlayerPrefs.Save();
-        }
-
-        public float GetLastScore()
-        {
-            return PlayerPrefs.GetFloat(SaveKeys.LastScore);
-        }
-
-        public float GetBestScore()
-        {
-            return PlayerPrefs.GetFloat(SaveKeys.BestScore);
         }
 
         ~ScoreController()

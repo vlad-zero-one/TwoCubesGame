@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿//using Assets.Scripts.Utils;
+using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
@@ -6,16 +7,15 @@ namespace Assets.Scripts
 {
     public class PathDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerDownHandler
     {
-        private Vector3 mousePosition;
-
-        private bool mousePressed;
+        public class TwoVector3Event : UnityEvent<Vector3, Vector3> { }
+        public class Vector3Event : UnityEvent<Vector3> { }
 
         public TwoVector3Event NewSegmentEvent = new TwoVector3Event();
-
         public Vector3Event OnBeginDragEvent = new Vector3Event();
         public Vector3Event OnEndDragEvent = new Vector3Event();
-
         public UnityEvent OnCancelClick = new UnityEvent();
+
+        private Vector3 mousePosition;
 
         private GameSettings gameSettings;
 
@@ -39,22 +39,17 @@ namespace Assets.Scripts
 
         public void OnBeginDrag(PointerEventData eventData)
         {
-            // Debug.Log("OnBeginDrag");
             var ray = Camera.main.ScreenPointToRay(eventData.position);
 
             if (Physics.Raycast(ray, out var hit))
             {
                 mousePosition = hit.point;
-                mousePressed = true;
-
                 OnBeginDragEvent?.Invoke(hit.point);
             }
         }
 
         public void OnDrag(PointerEventData eventData)
         {
-            //Debug.Log("OnDrag");
-
             var ray = Camera.main.ScreenPointToRay(eventData.position);
 
             if (Physics.Raycast(ray, out var hit))
@@ -74,21 +69,16 @@ namespace Assets.Scripts
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            // Debug.Log("OnEndDrag");
             var ray = Camera.main.ScreenPointToRay(eventData.position);
 
             if (Physics.Raycast(ray, out var hit))
             {
                 mousePosition = hit.point;
-                mousePressed = false;
-
                 OnEndDragEvent?.Invoke(hit.point);
             }
             else
             {
                 mousePosition = default;
-                mousePressed = false;
-
                 OnEndDragEvent?.Invoke(mousePosition);
             }
         }
@@ -100,8 +90,5 @@ namespace Assets.Scripts
             OnEndDragEvent?.RemoveAllListeners();
             OnCancelClick?.RemoveAllListeners();
         }
-
-        public class TwoVector3Event : UnityEvent<Vector3, Vector3> { }
-        public class Vector3Event : UnityEvent<Vector3> { }
     }
 }
